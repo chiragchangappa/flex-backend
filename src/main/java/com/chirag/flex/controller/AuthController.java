@@ -6,6 +6,7 @@ import com.chirag.flex.dto.SignupRequest;
 import com.chirag.flex.service.AuthService;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -27,9 +28,9 @@ public class AuthController {
     }
 
     @PostMapping("/forgot")
-    public String forgot(@RequestParam String email){
+    public ResponseEntity<?> forgot(@RequestParam String email) {
         service.forgotPassword(email);
-        return "Reset link sent";
+        return ResponseEntity.ok("Reset link sent");
     }
 
     @PostMapping("/reset")
