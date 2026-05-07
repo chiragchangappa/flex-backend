@@ -25,6 +25,14 @@ public class JwtFilter extends OncePerRequestFilter {
                                     FilterChain chain)
             throws ServletException, IOException {
 
+        String path = req.getServletPath();
+
+        // ✅ SKIP AUTH APIs
+        if (path.startsWith("/auth/")) {
+            chain.doFilter(req, res);
+            return;
+        }
+
         String header = req.getHeader("Authorization");
 
         if (header != null && header.startsWith("Bearer ")) {
@@ -43,7 +51,7 @@ public class JwtFilter extends OncePerRequestFilter {
                 SecurityContextHolder.getContext().setAuthentication(auth);
 
             } catch (Exception e) {
-                // invalid token → ignore and continue
+                // invalid token → ignore
             }
         }
 
