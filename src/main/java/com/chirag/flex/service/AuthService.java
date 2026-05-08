@@ -53,7 +53,7 @@ public class AuthService {
         repo.save(u);
 
         // ✅ ONLY ONE CLEAN LINK
-        String link = "http://192.168.1.10:5500/HTML/abc/reset.html?token=" + token;
+        String link = "https://benevolent-mochi-599607.netlify.app/reset.html?token=" + token;
 
         emailService.sendResetEmail(email, link);
     }
