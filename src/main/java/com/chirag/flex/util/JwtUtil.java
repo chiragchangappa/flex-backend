@@ -1,5 +1,5 @@
 package com.chirag.flex.util;
-
+import org.springframework.beans.factory.annotation.Value;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
 import org.springframework.stereotype.Component;
@@ -9,7 +9,8 @@ import java.util.Date;
 @Component
 public class JwtUtil {
 
-    private final String SECRET = "12345678901234567890123456789012";
+    @Value("${jwt.secret}")
+    private String SECRET;
 
     public String generateToken(String email, String role) {
         return Jwts.builder()

@@ -1,4 +1,6 @@
 package com.chirag.flex.service;
+import org.springframework.web.server.ResponseStatusException;
+import org.springframework.http.HttpStatus;
 
 
 import com.chirag.flex.entity.User;
@@ -20,9 +22,14 @@ public class AuthService {
 
     private final BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
 
-    public String signup(String email,String password){
-        if(repo.findByEmail(email).isPresent())
-            throw new RuntimeException("Email exists");
+    public String signup(String email, String password){
+
+        if(repo.findByEmail(email).isPresent()){
+            throw new ResponseStatusException(
+                    HttpStatus.CONFLICT,
+                    "Email already exists"
+            );
+        }
 
         User u = new User();
         u.setEmail(email);
@@ -30,6 +37,7 @@ public class AuthService {
         u.setRole("USER");
 
         repo.save(u);
+
         return "Registered";
     }
 
