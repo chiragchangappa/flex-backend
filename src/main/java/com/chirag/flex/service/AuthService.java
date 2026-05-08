@@ -61,7 +61,7 @@ public class AuthService {
         repo.save(u);
 
         // ✅ ONLY ONE CLEAN LINK
-        String link = "https://benevolent-mochi-599607.netlify.app/reset.html?token=" + token;
+        String link = "http://127.0.0.1:5500/reset.html?token=" + token;
 
         emailService.sendResetEmail(email, link);
     }

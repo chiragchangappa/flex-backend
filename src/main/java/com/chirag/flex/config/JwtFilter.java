@@ -24,13 +24,12 @@ public class JwtFilter extends OncePerRequestFilter {
                                     HttpServletResponse res,
                                     FilterChain chain)
             throws ServletException, IOException {
+    	String path = req.getServletPath();
 
-    	String path = req.getRequestURI();
-        // ✅ SKIP AUTH APIs
-        if (path.startsWith("/auth/")) {
-            chain.doFilter(req, res);
-            return;
-        }
+    	if (path.startsWith("/auth")) {
+    	    chain.doFilter(req, res);
+    	    return;
+    	}
 
         String header = req.getHeader("Authorization");
 

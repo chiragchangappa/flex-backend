@@ -31,6 +31,7 @@ public class SecurityConfig {
                 .requestMatchers("/payment/**").hasRole("USER")
                 .requestMatchers("/ads/**").hasRole("USER")
                 .requestMatchers("/admin/**").hasRole("ADMIN")
+                .requestMatchers("/auth/signup", "/auth/login", "/auth/forgot", "/auth/reset").permitAll()
                 .anyRequest().authenticated()
             )
 
