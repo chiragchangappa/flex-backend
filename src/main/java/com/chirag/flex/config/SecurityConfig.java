@@ -15,14 +15,39 @@ public class SecurityConfig {
         return new JwtFilter(jwtUtil);
     }
 
+    // ✅ CORS CONFIG
     @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http, JwtFilter jwtFilter) throws Exception {
+    public org.springframework.web.cors.CorsConfigurationSource corsConfigurationSource() {
+
+        org.springframework.web.cors.CorsConfiguration configuration =
+                new org.springframework.web.cors.CorsConfiguration();
+
+        configuration.setAllowedOrigins(
+                java.util.List.of(
+                        "https://benevolent-mochi-599607.netlify.app"
+                )
+        );
+
+        configuration.setAllowedMethods(java.util.List.of("*"));
+        configuration.setAllowedHeaders(java.util.List.of("*"));
+        configuration.setAllowCredentials(true);
+
+        org.springframework.web.cors.UrlBasedCorsConfigurationSource source =
+                new org.springframework.web.cors.UrlBasedCorsConfigurationSource();
+
+        source.registerCorsConfiguration("/**", configuration);
+
+        return source;
+    }
+
+    @Bean
+    public SecurityFilterChain filterChain(HttpSecurity http,
+                                           JwtFilter jwtFilter) throws Exception {
 
         http
-            // ❌ disable CSRF for APIs
             .csrf(csrf -> csrf.disable())
 
-            // ✅ IMPORTANT: enable CORS support
+            // ✅ enable cors
             .cors(cors -> {})
 
             .authorizeHttpRequests(auth -> auth
@@ -31,12 +56,12 @@ public class SecurityConfig {
                 .requestMatchers("/payment/**").hasRole("USER")
                 .requestMatchers("/ads/**").hasRole("USER")
                 .requestMatchers("/admin/**").hasRole("ADMIN")
-                .requestMatchers("/auth/signup", "/auth/login", "/auth/forgot", "/auth/reset").permitAll()
                 .anyRequest().authenticated()
             )
 
-            // JWT filter
-            .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
+            // ✅ JWT filter
+            .addFilterBefore(jwtFilter,
+                    UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }
