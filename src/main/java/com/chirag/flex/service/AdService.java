@@ -65,7 +65,7 @@ public class AdService {
             throw new RuntimeException("Payment not completed");
         }
 
-        String dir = "uploads/";
+        String dir = System.getProperty("java.io.tmpdir") + "/";
         new File(dir).mkdirs();
 
         // ✅ FIX ADDED HERE
