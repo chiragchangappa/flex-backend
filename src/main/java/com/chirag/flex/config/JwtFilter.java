@@ -25,14 +25,11 @@ public class JwtFilter extends OncePerRequestFilter {
                                     FilterChain chain)
             throws ServletException, IOException {
     	String path = req.getRequestURI();
-    	if (path.equals("/auth/login") ||
-    		    path.equals("/auth/signup") ||
-    		    path.equals("/auth/forgot") ||
-    		    path.equals("/auth/reset")) {
 
-    		    chain.doFilter(req, res);
-    		    return;
-    		}
+    	if (path.startsWith("/auth/")) {
+    	    chain.doFilter(req, res);
+    	    return;
+    	}
         String header = req.getHeader("Authorization");
 
         if (header != null && header.startsWith("Bearer ")) {

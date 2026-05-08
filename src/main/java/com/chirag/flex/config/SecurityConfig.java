@@ -3,9 +3,16 @@ package com.chirag.flex.config;
 import com.chirag.flex.util.JwtUtil;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+
+import java.util.List;
 
 @Configuration
 public class SecurityConfig {
@@ -15,27 +22,24 @@ public class SecurityConfig {
         return new JwtFilter(jwtUtil);
     }
 
-    // ✅ CORS CONFIG
+    // ✅ CORS CONFIG (Netlify + frontend allowed)
     @Bean
-    public org.springframework.web.cors.CorsConfigurationSource corsConfigurationSource() {
+    public CorsConfigurationSource corsConfigurationSource() {
 
-        org.springframework.web.cors.CorsConfiguration configuration =
-                new org.springframework.web.cors.CorsConfiguration();
+        CorsConfiguration config = new CorsConfiguration();
 
-        configuration.setAllowedOrigins(
-                java.util.List.of(
-                        "https://benevolent-mochi-599607.netlify.app"
-                )
-        );
+        config.setAllowedOrigins(List.of(
+                "https://benevolent-mochi-599607.netlify.app"
+        ));
 
-        configuration.setAllowedMethods(java.util.List.of("*"));
-        configuration.setAllowedHeaders(java.util.List.of("*"));
-        configuration.setAllowCredentials(true);
+        config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+        config.setAllowedHeaders(List.of("*"));
+        config.setAllowCredentials(true);
 
-        org.springframework.web.cors.UrlBasedCorsConfigurationSource source =
-                new org.springframework.web.cors.UrlBasedCorsConfigurationSource();
+        UrlBasedCorsConfigurationSource source =
+                new UrlBasedCorsConfigurationSource();
 
-        source.registerCorsConfiguration("/**", configuration);
+        source.registerCorsConfiguration("/**", config);
 
         return source;
     }
@@ -45,21 +49,36 @@ public class SecurityConfig {
                                            JwtFilter jwtFilter) throws Exception {
 
         http
+            // ❌ disable CSRF (REST APIs)
             .csrf(csrf -> csrf.disable())
 
-            // ✅ enable cors
+            // ✅ enable CORS
             .cors(cors -> cors.configurationSource(corsConfigurationSource()))
 
+            // ✅ stateless API (IMPORTANT for JWT)
+            .sessionManagement(session ->
+                session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+            )
+
+            // ✅ AUTH RULES
             .authorizeHttpRequests(auth -> auth
+
+                // allow preflight requests
+                .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+
+                // public APIs
                 .requestMatchers("/auth/**").permitAll()
                 .requestMatchers("/file/upload").permitAll()
+
+                // secured APIs
                 .requestMatchers("/payment/**").hasRole("USER")
                 .requestMatchers("/ads/**").hasRole("USER")
                 .requestMatchers("/admin/**").hasRole("ADMIN")
+
                 .anyRequest().authenticated()
             )
 
-            // ✅ JWT filter
+            // ✅ JWT FILTER
             .addFilterBefore(jwtFilter,
                     UsernamePasswordAuthenticationFilter.class);
 
