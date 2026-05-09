@@ -23,9 +23,12 @@ public class EmailService {
 
         Content content = new Content(
                 "text/plain",
-                "Click here to reset your password: " + link
+                "Hi,\n\n" +
+                "We received a request to reset your password.\n\n" +
+                "Click the link below to reset it:\n" + link + "\n\n" +
+                "If you did not request this, you can ignore this email.\n\n" +
+                "Thanks,\nFlex App"
         );
-
         Mail mail = new Mail(from, subject, recipient, content);
 
         SendGrid sg = new SendGrid(API_KEY);
