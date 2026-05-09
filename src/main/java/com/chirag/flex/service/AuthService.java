@@ -66,8 +66,9 @@ public class AuthService {
         emailService.sendResetEmail(email, link);
     }
     public void resetPassword(String token, String newPassword) {
+    	User user = repo.findByResetToken(token)
+    	        .orElseThrow(() -> new RuntimeException("Invalid token"));
 
-        User user = repo.findByResetToken(token);
 
         if (user == null) {
             throw new RuntimeException("Invalid token");
