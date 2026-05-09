@@ -70,6 +70,7 @@ public class SecurityConfig {
                 // public APIs
                 .requestMatchers("/auth/**").permitAll()
                 .requestMatchers("/file/upload").permitAll()
+                .requestMatchers("/uploads/**").permitAll()
 
                 // secured APIs
                 .requestMatchers("/payment/**").hasRole("USER")
