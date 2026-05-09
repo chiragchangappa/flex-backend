@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/auth")
 @CrossOrigin
 public class AuthController {
+	
 
     @Autowired
     private AuthService authService;
@@ -31,11 +32,10 @@ public class AuthController {
     }
 
     @PostMapping("/forgot")
-    public ResponseEntity<?> forgot(@RequestParam String email) {
-        authService.forgotPassword(email);
+    public ResponseEntity<?> forgot(@RequestBody SignupRequest req) {
+        authService.forgotPassword(req.getEmail());
         return ResponseEntity.ok("Reset link sent");
     }
-
     @PostMapping("/reset")
     public String resetPassword(@RequestBody ResetRequest req) {
         authService.resetPassword(req.getToken(), req.getNewPassword());
