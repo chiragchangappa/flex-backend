@@ -6,8 +6,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.File;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 
 @Service
 public class AdService {
@@ -15,16 +15,17 @@ public class AdService {
     @Autowired private AdRepository adRepo;
     @Autowired private UserRepository userRepo;
     @Autowired private PlaceRepository placeRepo;
+    @Autowired private CloudinaryService cloudinaryService;
 
     // ✅ STEP 1: Create Ad WITHOUT file
-    public Ad createAd(String email,String name,int duration,int days,
-                       List<String> placeNames,String fileUrl){
+    public Ad createAd(String email, String name, int duration, int days,
+                       List<String> placeNames, String fileUrl) {
 
         User user = userRepo.findByEmail(email).orElseThrow();
 
         List<Place> places = new ArrayList<>();
 
-        for(String p : placeNames){
+        for (String p : placeNames) {
             Place place = placeRepo.findByName(p)
                     .orElseGet(() -> {
                         Place newPlace = new Place();
@@ -41,7 +42,7 @@ public class AdService {
         ad.setDuration(duration);
         ad.setDays(days);
 
-        // ❗ IMPORTANT: no file initially
+        // no file initially
         ad.setFileUrl(null);
 
         ad.setAmount(amount);
@@ -52,13 +53,13 @@ public class AdService {
         return adRepo.save(ad);
     }
 
-    private double calculateAmount(int duration,int days,int placeCount){
+    // 💰 calculation
+    private double calculateAmount(int duration, int days, int placeCount) {
         return duration * days * placeCount * 2.5;
     }
 
-    // ✅ STEP 2: Upload file AFTER payment success
- // ✅ STEP 2: Upload file AFTER payment success
-    public String uploadFileAfterPayment(Long adId, MultipartFile file) throws Exception {
+    // ✅ STEP 2: Upload AFTER payment (CLOUDINARY VERSION)
+    public String uploadFileAfterPayment(Long adId, MultipartFile file) {
 
         Ad ad = adRepo.findById(adId).orElseThrow();
 
@@ -66,33 +67,24 @@ public class AdService {
             throw new RuntimeException("Payment not completed");
         }
 
-        // ✅ uploads folder inside project
-        String dir = System.getProperty("user.dir") + "/uploads/";
+        try {
+            // 🚀 Upload to Cloudinary instead of local storage
+            String imageUrl = cloudinaryService.uploadImage(file);
 
-        File folder = new File(dir);
+            // 💾 Save Cloudinary URL
+            ad.setFileUrl(imageUrl);
+            adRepo.save(ad);
 
-        if (!folder.exists()) {
-            folder.mkdirs();
+            return "File uploaded successfully";
+
+        } catch (Exception e) {
+            throw new RuntimeException("Upload failed: " + e.getMessage());
         }
-
-        // ✅ unique filename
-        String fileName = System.currentTimeMillis() + "_" + file.getOriginalFilename();
-
-        // ✅ full physical path
-        String fullPath = dir + fileName;
-
-        // ✅ save file physically
-        file.transferTo(new File(fullPath));
-
-        // ✅ save PUBLIC relative URL in DB
-        ad.setFileUrl("uploads/" + fileName);
-
-        adRepo.save(ad);
-
-        return "File uploaded successfully";
     }
 
-    public List<Ad> getUserAds(String email){
+    // 📦 Get user ads
+    public List<Ad> getUserAds(String email) {
+
         User user = userRepo.findByEmail(email).orElseThrow();
 
         return adRepo.findAll()
@@ -101,7 +93,8 @@ public class AdService {
                 .toList();
     }
 
-    public void deleteAd(Long id){
+    // 🗑 Delete ad
+    public void deleteAd(Long id) {
         adRepo.deleteById(id);
     }
 }
