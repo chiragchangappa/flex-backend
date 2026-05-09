@@ -57,6 +57,7 @@ public class AdService {
     }
 
     // ✅ STEP 2: Upload file AFTER payment success
+ // ✅ STEP 2: Upload file AFTER payment success
     public String uploadFileAfterPayment(Long adId, MultipartFile file) throws Exception {
 
         Ad ad = adRepo.findById(adId).orElseThrow();
@@ -65,16 +66,27 @@ public class AdService {
             throw new RuntimeException("Payment not completed");
         }
 
-        String dir = System.getProperty("java.io.tmpdir") + "/";
-        new File(dir).mkdirs();
+        // ✅ uploads folder inside project
+        String dir = System.getProperty("user.dir") + "/uploads/";
 
-        // ✅ FIX ADDED HERE
+        File folder = new File(dir);
+
+        if (!folder.exists()) {
+            folder.mkdirs();
+        }
+
+        // ✅ unique filename
         String fileName = System.currentTimeMillis() + "_" + file.getOriginalFilename();
-        String path = dir + fileName;
 
-        file.transferTo(new File(path));
+        // ✅ full physical path
+        String fullPath = dir + fileName;
 
-        ad.setFileUrl(path);
+        // ✅ save file physically
+        file.transferTo(new File(fullPath));
+
+        // ✅ save PUBLIC relative URL in DB
+        ad.setFileUrl("uploads/" + fileName);
+
         adRepo.save(ad);
 
         return "File uploaded successfully";
