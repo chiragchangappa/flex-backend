@@ -1,31 +1,47 @@
 package com.chirag.flex.service;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.mail.SimpleMailMessage;
-import org.springframework.mail.javamail.JavaMailSender;
+import com.sendgrid.*;
+import com.sendgrid.helpers.mail.Mail;
+import com.sendgrid.helpers.mail.objects.Content;
+import com.sendgrid.helpers.mail.objects.Email;
+
 import org.springframework.stereotype.Service;
+
+import java.io.IOException;
 
 @Service
 public class EmailService {
 
-    @Autowired
-    private JavaMailSender mailSender;
+    private static final String API_KEY = System.getenv("SENDGRID_API_KEY");
 
     public void sendResetEmail(String to, String link) {
+
+    	Email from = new Email("chiragchangappa02@gmail.com");
+        Email recipient = new Email(to);
+
+        String subject = "Reset Password";
+
+        Content content = new Content(
+                "text/plain",
+                "Click here to reset your password: " + link
+        );
+
+        Mail mail = new Mail(from, subject, recipient, content);
+
+        SendGrid sg = new SendGrid(API_KEY);
+        Request request = new Request();
+
         try {
-            SimpleMailMessage msg = new SimpleMailMessage();
-            msg.setTo(to);
-            msg.setSubject("Reset Password");
-            msg.setText("Click here to reset your password: " + link);
+            request.setMethod(Method.POST);
+            request.setEndpoint("mail/send");
+            request.setBody(mail.build());
 
-            mailSender.send(msg);
+            Response response = sg.api(request);
 
-            System.out.println("EMAIL SENT SUCCESSFULLY");
+            System.out.println("SendGrid Status: " + response.getStatusCode());
 
-        } catch (Exception e) {
-            System.out.println("EMAIL FAILED: " + e.getMessage());
-            e.printStackTrace();
-            throw new RuntimeException("Email sending failed");
+        } catch (IOException e) {
+            throw new RuntimeException("SendGrid email failed", e);
         }
     }
 }
