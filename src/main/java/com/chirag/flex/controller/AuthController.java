@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 @RestController
 @RequestMapping("/auth")
@@ -21,9 +22,16 @@ public class AuthController {
 
     @PostMapping("/signup")
     public ResponseEntity<String> signup(@RequestBody SignupRequest req) {
-        return ResponseEntity.ok(
-                authService.signup(req.getEmail(), req.getPassword())
-        );
+
+        try {
+            String result = authService.signup(req.getEmail(), req.getPassword());
+            return ResponseEntity.ok(result);
+
+        } catch (ResponseStatusException e) {
+            return ResponseEntity
+                    .status(e.getStatusCode())
+                    .body(e.getReason());
+        }
     }
 
     @PostMapping("/login")
