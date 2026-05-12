@@ -17,7 +17,7 @@ public class PaymentService {
     @Autowired private AdRepository adRepo;
     @Autowired private PaymentRepository paymentRepo;
 
-    private final String KEY = "rzpliveSoV4tm42C3kWRj";
+    private final String KEY = "rzp_live_SoV4tm42C3kWRj";
     private final String SECRET = "L5MGIcVlEhCjCcBhi7OV87kF";
 
     public String createOrder(Long adId) throws Exception {
