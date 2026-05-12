@@ -29,9 +29,10 @@ public class SecurityConfig {
         org.springframework.web.cors.CorsConfiguration config =
                 new org.springframework.web.cors.CorsConfiguration();
 
-        config.setAllowedOrigins(java.util.List.of(
-                "https://flexionsa.in"
-                
+        config.setAllowedOrigins(List.of(
+                "https://flexionsa.in",
+                "https://www.flexionsa.in",
+                "https://courageous-manatee-c59108.netlify.app"
         ));
 
         config.setAllowedMethods(java.util.List.of("GET","POST","PUT","DELETE","OPTIONS"));
